@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<!--
+ *  Shows a scene (a teapot on a short cylindrical base) that is illuminated
+ *  by up to four lights plus global ambient light.  The user can turn the
+ *  lights on and off.  The global ambient light is a dim white.  There is 
+ *  a white "viewpoint" light that points from the direction of the viewer
+ *  into the scene.  There is a red light, a blue light, and a green light
+ *  that rotate in circles above the teapot.  (The user can turn the animation
+ *  on and off.)  The locations of the colored lights are marked by spheres,
+ *  which are gray when the light is off and are colored by some emission color
+ *  when the light is on.  The teapot is gray with weak specular highlights.
+ *  The base is colored with a spectrum.  (The user can turn the display of
+ *  the base on and off.)  The mouse can be used to rotate the scene.
+-->
+<head>
+<meta charset="UTF-8">
+<title>Lab_6</title>
+<link rel="stylesheet" href="demo.css">
+<script src="demo-core.js"></script>
+<script src="glsim.js"></script>
+<script src="teapot-model-IFS.js"></script>
+<script>
+
+var camera;
+
+var animate;      
+var animating = false; 
+var frameNumber = 0;
+
+
+function uvSphere(radius, slices, stacks) {
+    var i,j;
+    for (j = 0; j < stacks; j++) {
+        var latitude1 = (Math.PI/stacks) * j - Math.PI/2;
+        var latitude2 = (Math.PI/stacks) * (j+1) - Math.PI/2;
+        var sinLat1 = Math.sin(latitude1);
+        var cosLat1 = Math.cos(latitude1);
+        var sinLat2 = Math.sin(latitude2);
+        var cosLat2 = Math.cos(latitude2);
+        glBegin(GL_TRIANGLE_STRIP);
+        for (i = 0; i <= slices; i++) {
+            var longitude = (2*Math.PI/slices) * i;
+            var sinLong = Math.sin(longitude);
+            var cosLong = Math.cos(longitude);
+            var x1 = cosLong * cosLat1;
+            var y1 = sinLong * cosLat1;
+            var z1 = sinLat1;
+            var x2 = cosLong * cosLat2;
+            var y2 = sinLong * cosLat2;
+            var z2 = sinLat2;
+            glNormal3d(x2,y2,z2);
+	    glVertex3d(radius*x2,radius*y2,radius*z2);
+	    glNormal3d(x1,y1,z1);
+            glVertex3d(radius*x1,radius*y1,radius*z1);
+        }
+        glEnd();
+    }
+}
+
+function lights() {
+    glColor3d(0.5,0.5,0.5);
+    var zero = [ 0, 0, 0, 1 ];
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, zero);
+    
+    if (viewpointLight.checked)
+        glEnable(GL_LIGHT0);
+    else
+        glDisable(GL_LIGHT0);
+    
+    if (ballLight.checked) {
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, [0.5, 0.5, 0, 1]);  
+        glEnable(GL_LIGHT1);
+    }
+    else {
+        glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, zero);  
+        glDisable(GL_LIGHT1);
+    }
+    glPushMatrix();
+    glRotated(-frameNumber, 0, 1, 0);
+    glTranslated(10, 7, 0);
+    glLightfv(GL_LIGHT1, GL_POSITION, zero);
+    uvSphere(0.5, 16, 8);
+    glPopMatrix();
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, zero); 
+}
+
+function triangle(j,k,n){
+        glBegin(GL_TRIANGLE_FAN);
+
+        glVertex3f((Math.cos(j * 2 * Math.PI / n)), (Math.sin(j * 2 * Math.PI / n)), 1.5);
+        glVertex3f((Math.cos(k * 2 * Math.PI / n)), (Math.sin(k * 2 * Math.PI / n)), 1.5);
+        glVertex3f(0, 0, 0);
+
+        glEnd();
+    }
+
+    function pyramid(size,n){    
+    glScalef(size, size, size);
+    glRotatef(90, 1, 0, 0);
+    glTranslatef(0, 0, -1);
+        
+        for(var i = 0; i < n; i++){
+            glPushMatrix();
+            triangle(i-1,i,n);
+            glPopMatrix();
+        }
+    }
+
+
+ function Base() {
+    glBegin(GL_QUADS);
+
+    glNormal3d(0, 0, 1);
+    glVertex3d(-1, -1, 1);
+    glVertex3d(1, -1, 1);
+    glVertex3d(1, 1, 1);
+    glVertex3d(-1, 1, 1);
+
+    glNormal3d(0, 0, -1);
+    glVertex3d(-1, -1, -1);
+    glVertex3d(-1, 1, -1);
+    glVertex3d(1, 1, -1);
+    glVertex3d(1, -1, -1);
+
+    glNormal3d(0, 1, 0);
+    glVertex3d(-1, 1, -1);
+    glVertex3d(-1, 1, 1);
+    glVertex3d(1, 1, 1);
+    glVertex3d(1, 1, -1);
+
+    glNormal3d(0, -1, 0);
+    glVertex3d(-1, -1, -1);
+    glVertex3d(1, -1, -1);
+    glVertex3d(1, -1, 1);
+    glVertex3d(-1, -1, 1);
+
+    glNormal3d(1, 0, 0);
+    glVertex3d(1, -1, -1);
+    glVertex3d(1, 1, -1);
+    glVertex3d(1, 1, 1);
+    glVertex3d(1, -1, 1);
+
+    glNormal3d(-1, 0, 0);
+    glVertex3d(-1, -1, -1);
+    glVertex3d(-1, -1, 1);
+    glVertex3d(-1, 1, 1);
+    glVertex3d(-1, 1, -1);
+
+    glEnd();
+}
+
+
+function display() {
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    camera.apply();
+
+    lights();
+
+    if (ambientLight.checked) {
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.15, 0.15, 0.15, 1] );
+    }
+    else {
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0, 0, 0, 1] );
+    }
+
+    glPushMatrix();
+    glTranslated(0, -5, 0);
+    glRotated(-90, 1, 0, 0);
+    glScaled(10, 10, 0.5);
+    Base();
+    glPopMatrix();
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.316228, 0.316228, 0.316228, 1]);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [0.54, 0.89, 0.63, 1])
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0.128);
+
+    glPushMatrix();
+    glTranslatef(0, -2, 0);
+    pyramid(5, 6);
+    glPopMatrix();
+}
+
+
+function initGL() {
+    glClearColor(0, 0, 0, 1);  
+    glEnable(GL_DEPTH_TEST); 
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_COLOR_MATERIAL);
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
+
+    var dim = [ 0.5, 0.5, 0.5, 1 ];
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, dim);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, dim);
+
+    var white =  [ 0.5, 0.5, 0.5, 1];
+    glLightfv(GL_LIGHT1, GL_AMBIENT, white);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, white);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, white);
+
+}
+
+function doFrame() {
+    if (animating) {
+	frameNumber++;
+	display();
+	setTimeout(doFrame, 30);
+    }
+}
+
+function init() {
+    try {
+        glsimUse("maincanvas");
+    }
+    catch (e) {
+        document.getElementById("canvas-holder").innerHTML="<p><b>Sorry, an error occurred:<br>" +
+                e + "</b></p>";
+	return;
+    }
+    animate = document.getElementById("animate");
+
+    ambientLight = document.getElementById("ambientLight");
+    viewpointLight = document.getElementById("viewpointLight");
+    ballLight = document.getElementById("ballLight");
+
+    animate.checked = false;
+    ambientLight.checked = true;
+    viewpointLight.checked = true;
+    ballLight.checked = true;
+    ambientLight.onchange = display;
+    viewpointLight.onchange = display;
+    ballLight.onchange = display;
+
+    animate.onchange = function() {
+	if (animate.checked) {
+	    animating = true;
+	    doFrame();
+	}
+	else {
+	    animating = false;
+	}
+    }
+    initGL();
+    camera = new Camera();
+    camera.lookAt(5,10,30, 0,0,0, 0,1,0);
+    camera.setScale(15);
+    camera.installTrackball(display);
+    display(); 
+}
+
+</script>
+</head>
+<body onload="init()">
+
+    <div id="content">
+    
+    <h3 id="headline">Light and material</h3>
+    
+    <div id="canvas-holder">
+    <canvas id="maincanvas" width="400" height="400"></canvas>
+    </div>
+    
+    <div id="tools">
+    <p>
+    <label><input type="checkbox" id="animate">Animate</label><br><br>
+    <label><input type="checkbox" id="ambientLight">Global Ambient</label><br><br>
+    <label><input type="checkbox" id="viewpointLight">Viewpoint Light</label><br>
+    <label><input type="checkbox" id="ballLight">Red Light</label><br>
+    
+    
+    
+    </p>
+    </div>
+    
+    </div>
+    
+    
+    
+    
+    
+    </body>
+</html>

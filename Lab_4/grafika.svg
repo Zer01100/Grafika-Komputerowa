@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+width="4in" height="4in"
+viewBox="0 0 400 400"
+preserveAspectRatio="xMidYMid">
+  <defs>
+    <path id="triangle" d="M 0 0 L 40 0 L 20 -100 Z" />
+    <rect id="rectangle" width="110px" height="10px" fill="red"/>
+    <g id="hexagon" transform="rotate(90, 100, 90)">
+      
+      <polygon points="100,30 150,60 150,120 100,150 50,120 50,60" fill="none" stroke="black"/>
+      
+      <line x1="100" y1="90" x2="100" y2="30" stroke="black"/>
+      <line x1="100" y1="90" x2="150" y2="60" stroke="black"/>
+      <line x1="100" y1="90" x2="150" y2="120" stroke="black"/>
+      <line x1="100" y1="90" x2="100" y2="150" stroke="black"/>
+      <line x1="100" y1="90" x2="50" y2="120" stroke="black"/>
+      <line x1="100" y1="90" x2="50" y2="60" stroke="black"/>
+    </g>
+
+    <path/>
+  </defs>
+
+    <use xlink:href="#triangle" transform="translate(200,300), scale(1,1)"        fill="blue"/>
+    <use xlink:href="#triangle" transform="translate(80,200), scale(0.8,0.8)"     fill="purple"/>
+    <use xlink:href="#triangle" transform="translate(320,150), scale(0.6,0.6)"    fill="green"/>
+
+    <use xlink:href="#rectangle" transform="translate(170,185), scale(1,1), rotate(10)"/>
+    <use xlink:href="#rectangle" transform="translate(55,105), scale(0.8,0.8), rotate(10)"/>
+    <use xlink:href="#rectangle" transform="translate(300,80), scale(0.6,0.6), rotate(10)"/>
+
+    <use xlink:href="#hexagon"  transform="translate(75,100),scale(0.7,0.7)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+    <use xlink:href="#hexagon"  transform="translate(170,117),scale(0.7,0.7)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+
+    <use xlink:href="#hexagon"  transform="translate(-40,20),scale(0.55,0.55)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+    <use xlink:href="#hexagon"  transform="translate(35,32),scale(0.55,0.55)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+
+    <use xlink:href="#hexagon"  transform="translate(203,-7),scale(0.4,0.4)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+    <use xlink:href="#hexagon"  transform="translate(260,3),scale(0.4,0.4)" transform-origin="100 90"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite" additive="sum"/></use>
+</svg>

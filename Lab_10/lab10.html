@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>CS 424 Lab 9</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.115/build/three.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+
+"use strict";
+
+var canvas, renderer, scene, camera; // Standard three.js requirements.
+
+var controls;  // An OrbitControls object that is used to implement
+               // rotation of the scene using the mouse.  (It actually rotates
+               // the camera around the scene.)
+
+var animating = false;  // Set to true when an animation is in progress.
+var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
+
+/**
+ *  The render function draws the scene.
+ */
+function render() {
+    renderer.render(scene, camera);
+}
+
+
+/**
+ * This function is called by the init() method to create the world. 
+ */
+function createWorld() {
+    
+    renderer.setClearColor("white"); // Background color for scene.
+    scene = new THREE.Scene();
+    
+    // ------------------- Make a camera with viewpoint light ----------------------
+    
+    camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
+    camera.position.z = 50;
+    camera.position.y = 20;
+    var light;  // A light shining from the direction of the camera; moves with the camera.
+    light = new THREE.DirectionalLight();
+    light.position.set(0,0,1);
+    camera.add(light);
+    scene.add(camera);
+    
+    //------------------- Create the scene's visible objects ----------------------
+
+
+        const material = new THREE.MeshPhongMaterial({ color: 0x000000 });
+
+        const Rook = new THREE.Group();
+
+        const baseBottomGeometry = new THREE.CylinderGeometry(2, 2, 0.4, 100);
+        const baseBottom = new THREE.Mesh(baseBottomGeometry, material);
+        Rook.add(baseBottom);
+        baseBottom.position.y = -1;
+
+        const baseTopGeometry = new THREE.CylinderGeometry(1.9, 1.9, 0.3, 100);
+        const baseTop = new THREE.Mesh(baseTopGeometry, material);
+        Rook.add(baseTop);
+        baseTop.position.y = -0.7;
+
+        const middleBottomGeometry = new THREE.CylinderGeometry(1, 1.8, 4, 100);
+        const middleBottom = new THREE.Mesh(middleBottomGeometry, material);
+        middleBottom.position.y = 1.4;
+        Rook.add(middleBottom);
+
+        const middleTopGeometry = new THREE.CylinderGeometry(1.4, 1, 2, 100);
+        const middleTop = new THREE.Mesh(middleTopGeometry, material);
+        middleTop.position.y = 4;
+        Rook.add(middleTop);
+
+        const TurretBottomGeometry = new THREE.CylinderGeometry(1.6, 1.5, 0.4, 100);
+        const TurretBottom = new THREE.Mesh(TurretBottomGeometry, material);
+        Rook.add(TurretBottom);
+        TurretBottom.position.y = 5;
+
+
+        const TurretTopGeometry = new THREE.CylinderGeometry(1.7, 1.7, 1, 100);
+        const holeGeometry = new THREE.CylinderGeometry(1.5, 1.5, 0.5, 100);
+        TurretTopGeometry.hole
+        const TurretTop = new THREE.Mesh(TurretTopGeometry, material);
+        Rook.add(TurretTop);
+        TurretTop.position.y = 5.2;
+        
+        Rook.add(TurretTop);
+
+        Rook.position.set(0, -5, 0);
+        scene.add(Rook);
+}
+
+
+/* ---------------------------- MOUSE AND ANIMATION SUPPORT ------------------
+
+/**
+ *  This page uses THREE.OrbitControls to let the user use the mouse to rotate
+ *  the view.  OrbitControls are designed to be used during an animation, where
+ *  the rotation is updated as part of preparing for the next frame.  The scene
+ *  is not automatically updated just because the user drags the mouse.  To get
+ *  the rotation to work without animation, I add another mouse listener to the
+ *  canvas, just to call the render() function when the user drags the mouse.
+ *  The same thing holds for touch events -- I call render for any mouse move
+ *  event with one touch.
+ */
+function installOrbitControls() {
+    controls = new THREE.OrbitControls(camera,canvas);
+    controls.noPan = true; 
+    controls.noZoom = true;
+    controls.staticMoving = true;
+    function move() {
+        controls.update();
+        if (! animating) {
+            render();
+        }
+    }
+    function down() {
+        document.addEventListener("mousemove", move, false);
+    }
+    function up() {
+        document.removeEventListener("mousemove", move, false);
+    }
+    function touch(event) {
+        if (event.touches.length == 1) {
+            move();
+        }
+    }
+    canvas.addEventListener("mousedown", down, false);
+    canvas.addEventListener("touchmove", touch, false);
+}
+
+/*  Called when user changes setting of the Animate checkbox. */
+function doAnimateCheckbox() {
+   var run = document.getElementById("animateCheckbox").checked;
+   if (run != animating) {
+       animating = run;
+       if (animating) {
+           requestAnimationFrame(doFrame);
+       }
+   }
+}
+
+/*  Drives the animation, called by system through requestAnimationFrame() */
+function doFrame() {
+    if (animating) {
+        frameNumber++;
+        updateForFrame();
+        render();
+        requestAnimationFrame(doFrame);
+    }
+}
+
+/*----------------------------- INITIALIZATION ----------------------------------------
+
+/**
+ *  This function is called by the onload event so it will run after the
+ *  page has loaded.  It creates the renderer, canvas, and scene objects,
+ *  calls createWorld() to add objects to the scene, and renders the
+ *  initial view of the scene.  If an error occurs, it is reported.
+ */
+function init() {
+    try {
+        canvas = document.getElementById("glcanvas");
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: false
+        });
+    }
+    catch (e) {
+        document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
+                e + "</b>";
+        return;
+    }
+
+    createWorld();
+    installOrbitControls();
+    render();
+}
+
+</script>
+</head>
+<body onload="init()">
+
+<div id="canvas-holder" style="float:left; border: thin solid black; background-color: white">
+   <canvas width=1200 height=600 id="glcanvas"></canvas>
+</div>
+
+</body>
+</html>
